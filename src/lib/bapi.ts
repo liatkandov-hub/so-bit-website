@@ -1,7 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import type { LeadInput } from "@/lib/validations/lead";
 
-const BAPI_URL = process.env.BAPI_URL ?? "http://localhost:3000/api/mock-bapi";
+function resolveBapiUrl(): string {
+  if (process.env.BAPI_URL) return process.env.BAPI_URL;
+  // Vercel sets VERCEL_URL to the current deployment's hostname at runtime;
+  // localhost has no meaning inside an isolated serverless function.
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}/api/mock-bapi`;
+  return "http://localhost:3000/api/mock-bapi";
+}
+
+const BAPI_URL = resolveBapiUrl();
 const BAPI_TIMEOUT_MS = 5000;
 const MAX_BAPI_ATTEMPTS = 5;
 
